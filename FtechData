@@ -1,0 +1,61 @@
+package prac5;
+
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+@WebServlet("/FetchData")
+public class FetchData extends HttpServlet {
+private static final long serialVersionUID = 1L;
+// JDBC URL, username, and password of MySQL server
+private static final String JDBC_URL ="jdbc:mysql://localhost:3306/anu?autoReconnect=true&useSSL=false";
+private static final String JDBC_USER = "root";
+private static final String JDBC_PASSWORD = "anu@123";
+protected void doGet(HttpServletRequest request, HttpServletResponse
+response) throws ServletException, IOException {
+// Set up PrintWriter to send HTML response
+response.setContentType("text/html");
+PrintWriter out = response.getWriter();
+try {
+// Load the MySQL JDBC driver
+Class.forName("com.mysql.cj.jdbc.Driver");
+// Establish connection to MySQL database
+Connection conn = DriverManager.getConnection(JDBC_URL, JDBC_USER,
+JDBC_PASSWORD);
+// SQL query to retrieve data from stud table
+String sql = "SELECT * FROM stud";
+// Create a PreparedStatement object
+PreparedStatement preparedStatement = conn.prepareStatement(sql);
+ResultSet resultSet = preparedStatement.executeQuery();
+// Display the table content in HTML format
+out.println("<html><body>");
+out.println("<h2>student information</h2>");
+out.println("<table border=\"1\" style=\"border-collapse:collapse;\">");
+out.println("<tr><th>roll_no</th><th>name</th>");
+// Iterate through the ResultSet and display each row
+while (resultSet.next()) {
+out.println("<tr>");
+out.println("<td>" + resultSet.getInt("roll_no") + "</td>");
+out.println("<td>" + resultSet.getString("name") + "</td>");
+out.println("</tr>");
+}
+out.println("</table>");
+out.println("</body></html>");
+resultSet.close();
+preparedStatement.close();
+conn.close();
+} catch (ClassNotFoundException | SQLException e) {
+e.printStackTrace();
+out.println("Error: " + e.getMessage());
+}
+}
+}
